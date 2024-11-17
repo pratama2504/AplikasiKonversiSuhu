@@ -1,8 +1,11 @@
+
+import javax.swing.ButtonGroup;
+import javax.swing.JOptionPane;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-
 /**
  *
  * @author USER
@@ -14,6 +17,68 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
      */
     public KonversiSuhuFrame() {
         initComponents();
+
+        // Tambahkan ButtonGroup untuk menyatukan JRadioButton
+        ButtonGroup group = new ButtonGroup();
+        group.add(rbCelcius);
+        group.add(rbFahrenheit);
+        group.add(rbReamur);
+        group.add(rbKelvin);
+
+// Tambahkan ItemListener untuk setiap JRadioButton
+        rbCelcius.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                    // Arah konversi ke Celcius dipilih
+                    System.out.println("Konversi ke Celcius dipilih");
+                }
+            }
+        });
+
+        rbFahrenheit.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                    // Arah konversi ke Fahrenheit dipilih
+                    System.out.println("Konversi ke Fahrenheit dipilih");
+                }
+            }
+        });
+
+        rbReamur.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                    // Arah konversi ke Reamur dipilih
+                    System.out.println("Konversi ke Reamur dipilih");
+                }
+            }
+        });
+
+        rbKelvin.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                    // Arah konversi ke Kelvin dipilih
+                    System.out.println("Konversi ke Kelvin dipilih");
+                }
+            }
+        });
+
+        txtNilaiSuhu.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                prosesKonversiOtomatis();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                prosesKonversiOtomatis();
+            }
+
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                // Tidak diperlukan untuk plain text field
+            }
+        });
+
     }
 
     /**
@@ -74,6 +139,12 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
         jPanel1.add(jLabel4, gridBagConstraints);
+
+        txtNilaiSuhu.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtNilaiSuhuKeyTyped(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 7, 7);
@@ -118,6 +189,11 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
         jPanel1.add(txtHasil, gridBagConstraints);
 
         btnHitung.setText("Hitung");
+        btnHitung.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHitungActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
@@ -129,6 +205,26 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnHitungActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHitungActionPerformed
+        prosesKonversi();        // TODO add your handling code here:
+    }//GEN-LAST:event_btnHitungActionPerformed
+
+    private void txtNilaiSuhuKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtNilaiSuhuKeyTyped
+        char c = evt.getKeyChar();
+
+        // Izinkan angka, titik desimal, dan tanda negatif
+        if (!Character.isDigit(c) && c != '.' && c != '-') {
+            evt.consume(); // Blokir input yang bukan angka, titik, atau tanda negatif
+        }
+
+        // Cegah lebih dari satu tanda negatif atau titik desimal
+        String text = txtNilaiSuhu.getText();
+        if ((c == '.' && text.contains(".")) || (c == '-' && text.length() > 0)) {
+            evt.consume(); // Blokir jika ada lebih dari satu titik atau tanda negatif bukan di awal
+        }
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNilaiSuhuKeyTyped
 
     /**
      * @param args the command line arguments
@@ -163,6 +259,127 @@ public class KonversiSuhuFrame extends javax.swing.JFrame {
                 new KonversiSuhuFrame().setVisible(true);
             }
         });
+    }
+
+    private void prosesKonversiOtomatis() {
+        try {
+            // Ambil input suhu
+            String inputNilaiSuhu = txtNilaiSuhu.getText();
+            if (inputNilaiSuhu.isEmpty()) {
+                txtHasil.setText(""); // Kosongkan hasil jika input kosong
+                return;
+            }
+
+            // Validasi apakah input berupa angka
+            double nilaiSuhu;
+            try {
+                nilaiSuhu = Double.parseDouble(inputNilaiSuhu);
+            } catch (NumberFormatException e) {
+                txtHasil.setText("Input tidak valid!");
+                return;
+            }
+
+            // Ambil satuan asal dan tujuan
+            String satuanAsal = cmbSatuanSuhu.getSelectedItem().toString();
+            String satuanTujuan = "";
+            if (rbCelcius.isSelected()) {
+                satuanTujuan = "Celcius";
+            } else if (rbFahrenheit.isSelected()) {
+                satuanTujuan = "Fahrenheit";
+            } else if (rbReamur.isSelected()) {
+                satuanTujuan = "Reamur";
+            } else if (rbKelvin.isSelected()) {
+                satuanTujuan = "Kelvin";
+            }
+
+            // Hitung hasil konversi
+            double hasilKonversi = konversiSuhu(nilaiSuhu, satuanAsal, satuanTujuan);
+
+            // Tampilkan hasil di txtHasil
+            txtHasil.setText(String.format("%.2f", hasilKonversi));
+
+        } catch (Exception e) {
+            txtHasil.setText("Error: " + e.getMessage());
+        }
+    }
+
+    private double konversiSuhu(double nilaiSuhu, String satuanAsal, String satuanTujuan) {
+        double hasil = 0;
+
+        // Konversi ke Celcius terlebih dahulu
+        double suhuDalamCelcius;
+        switch (satuanAsal) {
+            case "Fahrenheit":
+                suhuDalamCelcius = (nilaiSuhu - 32) * 5 / 9;
+                break;
+            case "Reamur":
+                suhuDalamCelcius = nilaiSuhu * 5 / 4;
+                break;
+            case "Kelvin":
+                suhuDalamCelcius = nilaiSuhu - 273.15;
+                break;
+            default: // "Celcius"
+                suhuDalamCelcius = nilaiSuhu;
+        }
+
+        // Konversi dari Celcius ke satuan tujuan
+        switch (satuanTujuan) {
+            case "Fahrenheit":
+                hasil = suhuDalamCelcius * 9 / 5 + 32;
+                break;
+            case "Reamur":
+                hasil = suhuDalamCelcius * 4 / 5;
+                break;
+            case "Kelvin":
+                hasil = suhuDalamCelcius + 273.15;
+                break;
+            default: // "Celcius"
+                hasil = suhuDalamCelcius;
+        }
+
+        return hasil;
+    }
+
+    private void prosesKonversi() {
+        try {
+            // Ambil input suhu
+            String inputNilaiSuhu = txtNilaiSuhu.getText();
+            if (inputNilaiSuhu.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Masukkan nilai suhu terlebih dahulu!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Validasi apakah input berupa angka
+            double nilaiSuhu;
+            try {
+                nilaiSuhu = Double.parseDouble(inputNilaiSuhu);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Masukkan nilai suhu yang valid (angka)!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Ambil satuan asal dan tujuan
+            String satuanAsal = cmbSatuanSuhu.getSelectedItem().toString();
+            String satuanTujuan = "";
+            if (rbCelcius.isSelected()) {
+                satuanTujuan = "Celcius";
+            } else if (rbFahrenheit.isSelected()) {
+                satuanTujuan = "Fahrenheit";
+            } else if (rbReamur.isSelected()) {
+                satuanTujuan = "Reamur";
+            } else if (rbKelvin.isSelected()) {
+                satuanTujuan = "Kelvin";
+            }
+
+            // Hitung hasil konversi
+            double hasilKonversi = konversiSuhu(nilaiSuhu, satuanAsal, satuanTujuan);
+
+            // Tampilkan hasil di txtHasil
+            txtHasil.setText(String.format("%.2f", hasilKonversi));
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Terjadi kesalahan: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
